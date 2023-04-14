@@ -1,80 +1,84 @@
-import * as React from 'react'
-import fullImage from './images/full.png'
-import flatImage from './images/flat.png'
-import lineImage from './images/lineart.png'
-import art0 from './images/art0.png'
-import art1 from './images/art1.png'
-import art2 from './images/art2.png'
-import art3 from './images/art3.png'
-import art4 from './images/art4.png'
-import art5 from './images/art5.png'
-import sketchImage from './images/sketch.png'
-import discordLogo from './images/discord-logo.svg'
-import githubLogo from './images/github-logo.svg'
-import twitterLogo from './images/twitter-logo.webp'
-import youtubeLogo from './images/youtube-logo.svg'
+import React from 'react'
+
+import { Medium, Tier } from './data/classes'
 import './App.css'
-import { Avatar, Box, Button, CssBaseline, Grid, ImageList, Modal, ImageListItem, PaletteMode, TextField, Theme, ThemeProvider, Typography, createTheme } from '@mui/material'
+import { Box, Button, CssBaseline, Grid, ImageList, Modal, ImageListItem, PaletteMode, TextField, Theme, ThemeProvider, Typography, createTheme } from '@mui/material'
+import CommissionSelectButton from './components/CommissionSelectButton'
+import ProfileLinkButton from './components/ProfileLinkButton'
+import AnimatedCommissionSelectButton from './components/AnimatedCommissionSelectButton'
 
-enum Tier {
-  Rendered,
-  Flat,
-  Lineart,
-  Sketch,
-}
 
+/** Interface for the app's state. */
 interface IAppState {
-  contactInfo: string,
+  email: string,
+  fullFrames: Array<string>,
+  flatFrames: Array<string>,
+  images: Record<string, string>,
+  lineFrames: Array<string>,
+  medium: Medium,
   message: string,
   msgModalOpen: boolean,
   price: number,
+  sketchFrames: Array<string>,
   theme: Theme,
   tier: Tier,
 }
 
+/** An object containing data for portfolio images. */
 const imgList = [
   {
-    img: art0,
+    key: 'art0.png',
     alt: 'Chainsaw Man x Hollow Knight artwork',
   },
   {
-    img: art1,
+    key: 'art1.png',
     alt: 'Hollow Knight Bindings artwork',
   },
   {
-    img: art2,
+    key: 'art2.png',
     alt: 'Hollow Knight Radiance gijinka artwork',
   },
   {
-    img: art3,
+    key: 'art3.png',
     alt: 'Crowsworn manga-style artwork',
   },
   {
-    img: art4,
+    key: 'art4.png',
     alt: 'Hollow Knight OCs artwork',
   },
   {
-    img: art5,
+    key: 'art5.png',
     alt: 'Golden mask artwork',
+  },
+  {
+    key: 'art6.png',
+    alt: 'Hornet wallpaper',
+  },
+  {
+    key: 'art7.png',
+    alt: 'Mushroom mage artwork',
   },
 ]
 
-const style = {
+/** Style for the message modal. */
+const modalStyle = {
   position: 'absolute' as 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: '25%',
-  maxWidth: '50%',
+  maxWidth: '100%',
   bgcolor: 'background.paper',
   border: '2px solid #dddddd',
   boxShadow: 24,
   p: 2,
 }
 
+/** The main application class. */
 export default class App extends React.Component<{}, IAppState> {
-  POST_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeieoARIXG-n6kTSTtwN6_Qvxhw-930QbDwSe13J0CfjAi6Qw/formResponse?'
-  CONTACT_FIELD = 'entry.2095249351'
+  URL_PREFIX = 'https://docs.google.com/forms/d/e/1FAIpQLSeieoARIXG-n6kTSTtwN6_Qvxhw-930QbDwSe13J0CfjAi6Qw/formResponse?'
+  EMAIL_FIELD = 'entry.2095249351'
+  MEDIUM_FIELD = 'entry.2053143014'
   MESSAGE_FIELD = 'entry.1209716240'
   PRICE_FIELD = 'entry.1149927974'
   TIER_FIELD = 'entry.240676536'
@@ -82,10 +86,16 @@ export default class App extends React.Component<{}, IAppState> {
   constructor(props: {}) {
     super(props)
     this.state = {
-      contactInfo: "",
+      email: "",
+      fullFrames: [],
+      flatFrames: [],
+      images: {},
+      lineFrames: [],
+      medium: Medium.Image,
       message: "",
       msgModalOpen: false,
       price: 0,
+      sketchFrames: [],
       theme: createTheme({
         components: {
           MuiButtonBase: {
@@ -103,29 +113,73 @@ export default class App extends React.Component<{}, IAppState> {
       tier: Tier.Rendered,
     }
 
-    this.chooseTier = this.chooseTier.bind(this)
+    this.importAll = this.importAll.bind(this)
     this.onClose = this.onClose.bind(this)
+    this.selectCommission = this.selectCommission.bind(this)
     this.submitRequest = this.submitRequest.bind(this)
   }
 
-  chooseTier(tier: Tier): void {
-    this.setState({ tier: tier, msgModalOpen: true })
+  /** @inheritdoc */
+  componentDidMount(): void {
+    this.setState({
+      images: this.importAll(require.context('./images', false, /\.(png|svg|webp)$/)),
+      fullFrames: Object.values(this.importAll(require.context('./images/full', false, /\.(png)$/))),
+      flatFrames: Object.values(this.importAll(require.context('./images/flat', false, /\.(png)$/))),
+      lineFrames: Object.values(this.importAll(require.context('./images/lineart', false, /\.(png)$/))),
+      sketchFrames: Object.values(this.importAll(require.context('./images/sketch', false, /\.(png)$/))),
+    })
   }
 
+  /**
+   * Imports all images from a given directory.
+   * @param req The require context.
+   * @returns An object containing all images.
+   */
+  importAll(req: __WebpackModuleApi.RequireContext) {
+    let images: Record<string, string> = {}
+    req.keys().map(item => { images[item.replace('./', '')] = req(item); })
+    return images
+  }
+
+  /**
+   * Whether the current email value is valid.
+   * @returns Whether the current email value is valid.
+   */
+  emailValid(): boolean {
+    const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+    return regex.test(this.state.email)
+  }
+
+  /**
+   * Sets the current tier and opens the message modal.
+   * @param medium The medium to set.
+   * @param tier The tier to set.
+   */
+  selectCommission(medium: Medium, tier: Tier): void {
+    this.setState({ medium, tier, msgModalOpen: true })
+  }
+
+  /** Handle closing the message modal. */
   onClose(): void {
     this.setState({ msgModalOpen: false })
   }
 
+  /**
+   * Submit a commission request.
+   * @param event The submitted form event.
+   * @returns A promise that resolves when the a response is received.
+   */
   async submitRequest(event: React.FormEvent<HTMLFormElement>): Promise<void> {
-    console.log("Contact info: " + this.state.contactInfo)
+    console.log("Email: " + this.state.email)
+    console.log("Medium: " + Medium[this.state.medium])
     console.log("Message: " + this.state.message)
     console.log("Tier: " + Tier[this.state.tier].toString())
     console.log("Price: " + this.state.price)
 
     event.preventDefault()
 
-    const postUrl = `${this.POST_URL}${this.CONTACT_FIELD}=${this.state.contactInfo.split(' ').join('%20')}&${this.MESSAGE_FIELD}=${this.state.message.split(' ').join('%20')}` +
-      `&${this.TIER_FIELD}=${Tier[this.state.tier].toString()}&${this.PRICE_FIELD}=${this.state.price}`
+    const postUrl = `${this.URL_PREFIX}${this.MEDIUM_FIELD}=${Medium[this.state.medium]}&${this.EMAIL_FIELD}=${this.state.email.split(' ').join('%20')}`+
+      `&${this.MESSAGE_FIELD}=${this.state.message.split(' ').join('%20')}&${this.TIER_FIELD}=${Tier[this.state.tier].toString()}&${this.PRICE_FIELD}=${this.state.price}`
 
     console.log("Post URL: " + postUrl)
     try {
@@ -140,104 +194,59 @@ export default class App extends React.Component<{}, IAppState> {
       console.error("Error: " + error)
     }
 
-    this.setState({ contactInfo: '', message: '', price: 0 })
-    const form = document.getElementById('commission-request-form') as HTMLFormElement;
-    form?.reset();
+    this.setState({ email: '', message: '', price: 0 })
+    const form = document.getElementById('commission-request-form') as HTMLFormElement
+    form?.reset()
 
     this.setState({ msgModalOpen: false })
   }
 
+  /** @inheritdoc */
   render(): React.ReactElement {
     return (
       <ThemeProvider theme={this.state.theme}>
         <CssBaseline />
-        <div className='App'>
+        <div id='App'>
           <Grid id='content-grid' container spacing={2}>
             <Grid id="portfolio" container item>
               <div>
-                <h1 id='portfolio-title' style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Typography id='portfolio-title' variant='h2'>
                   Some of My Works
-                </h1>
+                </Typography>
               </div>
               <ImageList id="portfolio-images" variant='masonry' cols={3} gap={4}>
                 {imgList.map((img) => (
-                  <ImageListItem key={img.img}>
-                    <img src={img.img} alt={img.alt} loading='lazy' />
+                  <ImageListItem key={img.key}>
+                    <img src={this.state.images[img.key]} alt={img.alt} loading='lazy' />
                   </ImageListItem>
                 ))}
               </ImageList>
             </Grid>
-            <div>
-              <h1 id="tier-select-title">Choose a Tier</h1>
-            </div>
-            <Grid id='sample-selection-grid' container item sx={{ overflowX: 'scroll' }}>
-              <Grid container item xs={3}>
-                <Button id='full-sample-button' className='sample-button' type='button' onClick={() => this.chooseTier(Tier.Rendered)}>
-                  <Grid item>
-                    <Typography id='full-text' variant='h4'>Rendered</Typography>
-                    <Box component='img' id='full-sample' className='sample' src={fullImage} alt='Fully rendered tier' />
-                  </Grid>
-                </Button>
-              </Grid>
-              <Grid container item xs={3}>
-                <Button id='flat-sample-button' className='sample-button' type='button' onClick={() => this.chooseTier(Tier.Flat)}>
-                  <Grid item>
-                    <Typography id='flat-text' variant='h4'>Flat</Typography>
-                    <Box component='img' id='flat-sample' className='sample' src={flatImage} alt='Flat shading tier' />
-                  </Grid>
-                </Button>
-              </Grid>
-              <Grid container item xs={3}>
-                <Button id='lineart-sample-button' className='sample-button' type='button' onClick={() => this.chooseTier(Tier.Lineart)}>
-                  <Grid item>
-                    <Typography id='lineart-text' variant='h4'>Lineart</Typography>
-                    <Box component='img' id='lineart-sample' className='sample' src={lineImage} alt='Lineart tier' />
-                  </Grid>
-                </Button>
-              </Grid>
-              <Grid container item xs={3} >
-                <Button id='sketch-sample-button' className='sample-button' type='button' onClick={() => this.chooseTier(Tier.Sketch)}>
-                  <Grid item>
-                    <Typography id='sketch-text' variant='h4'>Sketch</Typography>
-                    <Box component='img' id='sketch-sample' className='sample' src={sketchImage} alt='Sketch tier' />
-                  </Grid>
-                </Button>
-              </Grid>
+            <Grid item xs={12}>
+              <Typography id="commission-select-title" variant='h2'>Choose a Tier</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography id="image-medium-title" variant='h4'>Still Image</Typography>
+            </Grid>
+            <Grid id='image-sample-selection-grid' container item sx={{ overflowX: 'scroll' }}>
+              <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['full.png']} tier={Tier.Rendered} />
+              <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['flat.png']} tier={Tier.Flat} />
+              <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['lineart.png']} tier={Tier.Lineart} />
+              <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['sketch.png']} tier={Tier.Sketch} />
+            </Grid>
+            <Typography id="animation-medium-title" variant='h4'>Animation</Typography>
+            <Grid id='animation-sample-selection-grid' container item sx={{ overflowX: 'scroll' }}>
+              <AnimatedCommissionSelectButton frames={this.state.fullFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Rendered} />
+              <AnimatedCommissionSelectButton frames={this.state.flatFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Flat} />
+              <AnimatedCommissionSelectButton frames={this.state.lineFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Lineart} />
+              <AnimatedCommissionSelectButton frames={this.state.sketchFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Sketch} />
             </Grid>
             <footer className='footer'>
               <Grid id='profile-links' container item>
-                <Grid item xs={3}>
-                  <Button variant='contained'
-                    color='inherit'
-                    startIcon={<Avatar id='discord-avatar' className='logo-avatar' src={discordLogo} variant='rounded' />}
-                    href='https://discord.com/users/799432073387442217'>
-                    Italy#0316
-                  </Button>
-                </Grid>
-                <Grid item xs={3}>
-                  <Button variant='contained'
-                    color='inherit'
-                    startIcon={<Avatar id='twitter-avatar' className='logo-avatar' src={twitterLogo} variant='rounded' />}
-                    href='https://twitter.com/JngoCreates'>
-                    JngoCreates
-                  </Button>
-                </Grid>
-                <Grid item xs={3}>
-                  <Button variant='contained'
-                    color='inherit'
-                    startIcon={<Avatar id='youtube-avatar' className='logo-avatar' src={youtubeLogo} variant='rounded' />}
-                    href='https://www.youtube.com/@jngo102/'>
-                    jngo102
-                  </Button>
-                </Grid>
-                <Grid container item xs={3}>
-                  <Button variant='contained'
-                    color='inherit'
-                    startIcon={<Avatar id='github-avatar' className='logo-avatar' src={githubLogo} variant='rounded' />}
-                    href='https://github.com/JngoCreates'>
-                    JngoCreates
-                  </Button>
-                </Grid>
+                <ProfileLinkButton href='https://discord.com/users/799432073387442217' logo={this.state.images['discord-logo.svg']} name='Discord' profile='Italy#0316' />
+                <ProfileLinkButton href='https://twitter.com/JngoCreates' logo={this.state.images['twitter-logo.webp']} name='Twitter' profile='JngoCreates' />
+                <ProfileLinkButton href='https://www.youtube.com/@jngo102/' logo={this.state.images['youtube-logo.svg']} name='YouTube' profile='jngo102' />
+                <ProfileLinkButton href='https://github.com/JngoCreates' logo={this.state.images['github-logo.svg']} name='GitHub' profile='JngoCreates' />
               </Grid>
             </footer>
           </Grid>
@@ -246,7 +255,7 @@ export default class App extends React.Component<{}, IAppState> {
             onClose={this.onClose}
             aria-labelledby='msg-modal-title'
             aria-describedby='msg-modal-description'>
-            <Box sx={style}>
+            <Box sx={modalStyle}>
               <Typography id='msg-modal-title' variant='h6'>
                 Send me a message.
               </Typography>
@@ -258,24 +267,18 @@ export default class App extends React.Component<{}, IAppState> {
                 encType='text/plain'
                 target='cancel-redirect'
                 onSubmit={this.submitRequest}>
-                <input id='entry.240676536'
-                  name='entry.240676536'
-                  hidden
-                  readOnly
-                  value={Tier[this.state.tier].toString()} />
-                <TextField id='entry.2095249351'
+                <TextField id='email-field'
                   required
-                  name='entry.2095249351'
-                  label='Your contact info'
-                  helperText='email, Discord, Twitter, anywhere I can reach you.'
-                  color={this.state.contactInfo === '' ? 'error' : 'success'}
-                  onChange={(event) => this.setState({ contactInfo: event.currentTarget.value })}
-                  value={this.state.contactInfo}
+                  label='Your email address.'
+                  type='email'
+                  helperText='I will reach out to you via email.'
+                  color={this.emailValid() ? 'success' : 'error'}
+                  onChange={(event) => this.setState({ email: event.currentTarget.value })}
+                  value={this.state.email}
                   variant='outlined'
                   fullWidth />
-                <TextField id='entry.1209716240'
+                <TextField id='message-field'
                   required
-                  name='entry.1209716240'
                   color={this.state.message === '' ? 'error' : 'success'}
                   label='Your request'
                   helperText='Describe in as much detail as possible.'
@@ -285,9 +288,8 @@ export default class App extends React.Component<{}, IAppState> {
                   variant='outlined'
                   fullWidth
                   minRows={8} />
-                <TextField id='entry.1149927974'
+                <TextField id='price-field'
                   required
-                  name='entry.1149927974'
                   color={(this.state.price <= 0 || isNaN(this.state.price)) ? 'error' : 'success'}
                   type='number'
                   label='Your price'
@@ -297,7 +299,7 @@ export default class App extends React.Component<{}, IAppState> {
                   variant='outlined'
                   fullWidth />
                 <Button id='submit-request-button'
-                  disabled={this.state.contactInfo === '' || this.state.message === '' || (this.state.price <= 0 || isNaN(this.state.price))}
+                  disabled={!this.emailValid() || this.state.message === '' || (this.state.price <= 0 || isNaN(this.state.price))}
                   type='submit'
                   variant='contained'
                   color='primary'>
