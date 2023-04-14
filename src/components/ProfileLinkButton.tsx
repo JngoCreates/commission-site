@@ -14,10 +14,10 @@ export default class ProfileLinkButton extends React.Component<IProfileLinkButto
     /** @inheritdoc */
     render(): React.ReactElement {
         return (
-            <Grid item xs={3}>
-                <Button variant='contained'
+            <Grid item xs={1}>
+                <Button variant='text'
                     color='inherit'
-                    startIcon={<img id={this.props.name.toLowerCase() + '-logo'} className='logo-avatar' src={this.props.logo} alt={this.props.name + ' Logo'} style={{ maxWidth: '32px' }} />}
+                    startIcon={<img id={this.props.name.toLowerCase() + '-logo'} className='logo-avatar' src={this.props.logo} alt={this.props.name + ' Logo'} style={{ maxHeight: '32px' }} />}
                     href={this.props.href}>
                     {this.props.profile}
                 </Button>

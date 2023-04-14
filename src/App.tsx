@@ -2,24 +2,26 @@ import React from 'react'
 
 import { Medium, Tier } from './data/classes'
 import './App.css'
-import { Box, Button, CssBaseline, Grid, ImageList, Modal, ImageListItem, PaletteMode, TextField, Theme, ThemeProvider, Typography, createTheme } from '@mui/material'
+import { Box, Button, CssBaseline, Grid, ImageList, Modal, ImageListItem, PaletteMode, TextField, Theme, ThemeProvider, Typography, createTheme, AppBar } from '@mui/material'
 import CommissionSelectButton from './components/CommissionSelectButton'
 import ProfileLinkButton from './components/ProfileLinkButton'
 import AnimatedCommissionSelectButton from './components/AnimatedCommissionSelectButton'
+import AnimatedImageListItem from './components/AnimatedImageListItem'
 
 
 /** Interface for the app's state. */
 interface IAppState {
+  art8Frames: string[],
   email: string,
-  fullFrames: Array<string>,
-  flatFrames: Array<string>,
+  fullFrames: string[],
+  flatFrames: string[],
   images: Record<string, string>,
-  lineFrames: Array<string>,
+  lineFrames: string[],
   medium: Medium,
   message: string,
   msgModalOpen: boolean,
   price: number,
-  sketchFrames: Array<string>,
+  sketchFrames: string[],
   theme: Theme,
   tier: Tier,
 }
@@ -27,36 +29,44 @@ interface IAppState {
 /** An object containing data for portfolio images. */
 const imgList = [
   {
-    key: 'art0.png',
     alt: 'Chainsaw Man x Hollow Knight artwork',
+    key: 'art0.png',
+    link: 'https://twitter.com/JngoCreates/status/1619040941524013056?s=20',
   },
   {
-    key: 'art1.png',
     alt: 'Hollow Knight Bindings artwork',
+    key: 'art1.png',
+    link: 'https://cdn.discordapp.com/attachments/450086968756535298/854821379211001896/bindings.png',
   },
   {
-    key: 'art2.png',
     alt: 'Hollow Knight Radiance gijinka artwork',
+    key: 'art2.png',
+    link: 'https://twitter.com/JngoCreates/status/1622299390919450626?s=20',
   },
   {
-    key: 'art3.png',
     alt: 'Crowsworn manga-style artwork',
+    key: 'art3.png',
+    link: 'https://twitter.com/jason_ngo1/status/1430193837117427713?s=20',
   },
   {
-    key: 'art4.png',
     alt: 'Hollow Knight OCs artwork',
+    key: 'art4.png',
+    link: '#',
   },
   {
-    key: 'art5.png',
     alt: 'Golden mask artwork',
+    key: 'art5.png',
+    link: 'https://twitter.com/JngoCreates/status/1528231117014327298?s=20',
   },
   {
-    key: 'art6.png',
     alt: 'Hornet wallpaper',
+    key: 'art6.png',
+    link: 'https://twitter.com/jason_ngo1/status/1454786913953529858?s=20',
   },
   {
-    key: 'art7.png',
     alt: 'Mushroom mage artwork',
+    key: 'art7.png',
+    link: 'https://twitter.com/jason_ngo1/status/1402703496516939782?s=20',
   },
 ]
 
@@ -82,10 +92,12 @@ export default class App extends React.Component<{}, IAppState> {
   MESSAGE_FIELD = 'entry.1209716240'
   PRICE_FIELD = 'entry.1149927974'
   TIER_FIELD = 'entry.240676536'
+  ART8_LINK = 'https://twitter.com/jason_ngo1/status/1408447435542872077?s=20'
 
   constructor(props: {}) {
     super(props)
     this.state = {
+      art8Frames: [],
       email: "",
       fullFrames: [],
       flatFrames: [],
@@ -122,6 +134,7 @@ export default class App extends React.Component<{}, IAppState> {
   /** @inheritdoc */
   componentDidMount(): void {
     this.setState({
+      art8Frames: Object.values(this.importAll(require.context('./images/art8', false, /\.(png)$/))),
       images: this.importAll(require.context('./images', false, /\.(png|svg|webp)$/)),
       fullFrames: Object.values(this.importAll(require.context('./images/full', false, /\.(png)$/))),
       flatFrames: Object.values(this.importAll(require.context('./images/flat', false, /\.(png)$/))),
@@ -156,6 +169,40 @@ export default class App extends React.Component<{}, IAppState> {
    * @param tier The tier to set.
    */
   selectCommission(medium: Medium, tier: Tier): void {
+    switch (medium) {
+      case Medium.Image:
+        switch (tier) {
+          case Tier.Rendered:
+            this.setState({ price: 40 })
+            break
+          case Tier.Flat:
+            this.setState({ price: 20 })
+            break
+          case Tier.Lineart:
+            this.setState({ price: 10 })
+            break
+          case Tier.Sketch:
+            this.setState({ price: 5 })
+            break
+        }
+        break
+      case Medium.Animation:
+        switch (tier) {
+          case Tier.Rendered:
+            this.setState({ price: 80 })
+            break
+          case Tier.Flat:
+            this.setState({ price: 50 })
+            break
+          case Tier.Lineart:
+            this.setState({ price: 30 })
+            break
+          case Tier.Sketch:
+            this.setState({ price: 20 })
+            break
+        }
+        break
+    }
     this.setState({ medium, tier, msgModalOpen: true })
   }
 
@@ -207,26 +254,47 @@ export default class App extends React.Component<{}, IAppState> {
       <ThemeProvider theme={this.state.theme}>
         <CssBaseline />
         <div id='App'>
-          <Grid id='content-grid' container spacing={2}>
+          <Grid id='content-grid' container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            <AppBar id='navbar' position='sticky' style={{ padding: '8px 8px 8px 8px' }}>
+              <Grid id='profile-links' container item>
+                <Grid item xs={2}>
+                  <Typography id='socials-title' className='title' variant='h6' sx={{ paddingLeft: '32px' }}>
+                    My Social Media
+                  </Typography>
+                </Grid>
+                <ProfileLinkButton href='https://discord.com/users/799432073387442217' logo={this.state.images['discord-logo.svg']} name='Discord' profile='Italy#0316' />
+                <ProfileLinkButton href='https://twitter.com/JngoCreates' logo={this.state.images['twitter-logo.webp']} name='Twitter' profile='JngoCreates' />
+                <ProfileLinkButton href='https://www.youtube.com/@jngo102/' logo={this.state.images['youtube-logo.svg']} name='YouTube' profile='jngo102' />
+                <ProfileLinkButton href='https://github.com/JngoCreates' logo={this.state.images['github-logo.svg']} name='GitHub' profile='JngoCreates' />
+              </Grid>
+            </AppBar>
+            <Grid container item>
+              <header>
+                <Typography id='name' variant='h1'>Welcome to JngoCreates' commission page!</Typography>
+              </header>
+            </Grid>
             <Grid id="portfolio" container item>
               <div>
                 <Typography id='portfolio-title' variant='h2'>
-                  Some of My Works
+                  Some of my works
                 </Typography>
               </div>
-              <ImageList id="portfolio-images" variant='masonry' cols={3} gap={4}>
+              <ImageList id="portfolio-images" variant='masonry' cols={4} gap={4}>
                 {imgList.map((img) => (
-                  <ImageListItem key={img.key}>
-                    <img src={this.state.images[img.key]} alt={img.alt} loading='lazy' />
-                  </ImageListItem>
+                  <a href={img.link}>
+                    <ImageListItem key={img.key}>
+                      <img src={this.state.images[img.key]} alt={img.alt} loading='lazy' />
+                    </ImageListItem>
+                  </a>
                 ))}
+                <AnimatedImageListItem link={this.ART8_LINK} fps={12} frames={this.state.art8Frames} />
               </ImageList>
             </Grid>
             <Grid item xs={12}>
               <Typography id="commission-select-title" variant='h2'>Choose a Tier</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography id="image-medium-title" variant='h4'>Still Image</Typography>
+              <Typography id="image-medium-title" className='title' variant='h4'>Image</Typography>
             </Grid>
             <Grid id='image-sample-selection-grid' container item sx={{ overflowX: 'scroll' }}>
               <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['full.png']} tier={Tier.Rendered} />
@@ -234,21 +302,15 @@ export default class App extends React.Component<{}, IAppState> {
               <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['lineart.png']} tier={Tier.Lineart} />
               <CommissionSelectButton medium={Medium.Image} onSelect={this.selectCommission} src={this.state.images['sketch.png']} tier={Tier.Sketch} />
             </Grid>
-            <Typography id="animation-medium-title" variant='h4'>Animation</Typography>
-            <Grid id='animation-sample-selection-grid' container item sx={{ overflowX: 'scroll' }}>
-              <AnimatedCommissionSelectButton frames={this.state.fullFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Rendered} />
-              <AnimatedCommissionSelectButton frames={this.state.flatFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Flat} />
-              <AnimatedCommissionSelectButton frames={this.state.lineFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Lineart} />
-              <AnimatedCommissionSelectButton frames={this.state.sketchFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Sketch} />
+            <Grid item xs={12}>
+              <Typography id="animation-medium-title" className='title' variant='h4'>Animation</Typography>
             </Grid>
-            <footer className='footer'>
-              <Grid id='profile-links' container item>
-                <ProfileLinkButton href='https://discord.com/users/799432073387442217' logo={this.state.images['discord-logo.svg']} name='Discord' profile='Italy#0316' />
-                <ProfileLinkButton href='https://twitter.com/JngoCreates' logo={this.state.images['twitter-logo.webp']} name='Twitter' profile='JngoCreates' />
-                <ProfileLinkButton href='https://www.youtube.com/@jngo102/' logo={this.state.images['youtube-logo.svg']} name='YouTube' profile='jngo102' />
-                <ProfileLinkButton href='https://github.com/JngoCreates' logo={this.state.images['github-logo.svg']} name='GitHub' profile='JngoCreates' />
-              </Grid>
-            </footer>
+            <Grid id='animation-sample-selection-grid' container item sx={{ overflowX: 'scroll' }}>
+              <AnimatedCommissionSelectButton fps={6} frames={this.state.fullFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Rendered} />
+              <AnimatedCommissionSelectButton fps={6} frames={this.state.flatFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Flat} />
+              <AnimatedCommissionSelectButton fps={6} frames={this.state.lineFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Lineart} />
+              <AnimatedCommissionSelectButton fps={6} frames={this.state.sketchFrames} medium={Medium.Animation} onSelect={this.selectCommission} src='' tier={Tier.Sketch} />
+            </Grid>
           </Grid>
           <Modal id='msg-modal'
             open={this.state.msgModalOpen}

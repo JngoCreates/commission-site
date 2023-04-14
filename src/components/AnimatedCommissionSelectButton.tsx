@@ -1,36 +1,23 @@
 import React from "react"
 import { ICommissionSelectButtonProps } from "./CommissionSelectButton"
 import CommissionSelectButton from "./CommissionSelectButton"
+import AnimatedComponent, { IAnimatedComponentProps, IAnimatedComponentState } from "./AnimatedComponent"
 
 /** Properties of the animated commission select button. */
-interface IAnimatedCommissionSelectButtonProps extends ICommissionSelectButtonProps {
-    frames: string[],
-}
+interface IAnimatedCommissionSelectButtonProps extends ICommissionSelectButtonProps, IAnimatedComponentProps {}
 
-/** The state of the animated commission select button. */
-interface IAnimatedCommissionSelectButtonState {
-    currentFrameSrc: string,
-}
-
-export default class AnimatedCommissionSelectButton extends React.Component<IAnimatedCommissionSelectButtonProps, IAnimatedCommissionSelectButtonState> {
+export default class AnimatedCommissionSelectButton extends AnimatedComponent<IAnimatedCommissionSelectButtonProps, IAnimatedComponentState> {
     constructor(props: IAnimatedCommissionSelectButtonProps) {
         super(props)
 
         this.state = {
             currentFrameSrc: this.props.frames[0],
         }
-
-        this.incrementFrame = this.incrementFrame.bind(this)
-    }
-
-    /** @inheritdoc */
-    componentDidMount(): void {
-        setInterval(this.incrementFrame, 1000 / 6)
     }
 
     /** Increment the current frame of the animation. */
     incrementFrame(): void {
-        this.setState((state: IAnimatedCommissionSelectButtonState) => {
+        this.setState((state: IAnimatedComponentState) => {
             const nextFrameIndex = (this.props.frames.indexOf(state.currentFrameSrc) + 1) % this.props.frames.length
             return { currentFrameSrc: this.props.frames[nextFrameIndex] }
         })
