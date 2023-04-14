@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.aeb503db.css","mappings":"AAKA,wBACI,WAAY,CACZ,UACJ","sources":["App.css"],"sourcesContent":["img.sample {\r\n    height: 100%;\r\n    width: auto;\r\n}\r\n\r\n.logo-avatar {\r\n    height: 100%;\r\n    width: auto;\r\n}"],"names":[],"sourceRoot":""}
