@@ -1,16 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createTheme } from '@mui/material/styles';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { CssBaseline, PaletteMode, ThemeProvider } from '@mui/material';
-import { BrowserRouter } from 'react-router-dom';
-
-const theme = createTheme({
-  palette: {
-    mode: "light" as PaletteMode,
-  }
-})
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -18,12 +9,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <App />
   </React.StrictMode>
 );
 
