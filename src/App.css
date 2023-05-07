@@ -2,6 +2,11 @@
     padding: 8px;
 }
 
+img.sample {
+    max-width: 100%;
+    height: auto;
+}
+
 body {
     background-image: linear-gradient(to bottom right, #d7a7e3, #c3c7ab, #ce8e6a)
 }

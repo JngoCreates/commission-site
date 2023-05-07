@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Medium, Tier } from './data/classes'
 import './App.css'
-import { Box, Button, CssBaseline, Grid, ImageList, Modal, ImageListItem, PaletteMode, TextField, Theme, ThemeProvider, Typography, createTheme, AppBar } from '@mui/material'
+import { AppBar, Box, Button, Container, CssBaseline, Grid, ImageList, Modal, ImageListItem, PaletteMode, TextField, Theme, ThemeProvider, Typography, createTheme } from '@mui/material'
 import CommissionSelectButton from './components/CommissionSelectButton'
 import ProfileLinkButton from './components/ProfileLinkButton'
 import AnimatedCommissionSelectButton from './components/AnimatedCommissionSelectButton'
@@ -68,6 +68,11 @@ const imgList = [
     key: 'art7.png',
     link: 'https://twitter.com/jason_ngo1/status/1402703496516939782?s=20',
   },
+  {
+    alt: 'Rune Fencer Illyia fan art',
+    key: 'art9.png',
+    link: 'https://twitter.com/JngoCreates/status/1655291586240978944?s=20',
+  }, 
 ]
 
 /** Style for the message modal. */
@@ -76,8 +81,8 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '25%',
   maxWidth: '100%',
+  overflowY: 'scroll',
   bgcolor: 'background.paper',
   border: '2px solid #dddddd',
   boxShadow: 24,
@@ -150,7 +155,7 @@ export default class App extends React.Component<{}, IAppState> {
    */
   importAll(req: __WebpackModuleApi.RequireContext) {
     let images: Record<string, string> = {}
-    req.keys().map(item => { images[item.replace('./', '')] = req(item); })
+    req.keys().map(item => { images[item.replace('./', '')] = req(item) })
     return images
   }
 
@@ -189,13 +194,13 @@ export default class App extends React.Component<{}, IAppState> {
       case Medium.Animation:
         switch (tier) {
           case Tier.Rendered:
-            this.setState({ price: 80 })
+            this.setState({ price: 100 })
             break
           case Tier.Flat:
-            this.setState({ price: 50 })
+            this.setState({ price: 70 })
             break
           case Tier.Lineart:
-            this.setState({ price: 30 })
+            this.setState({ price: 40 })
             break
           case Tier.Sketch:
             this.setState({ price: 20 })
@@ -268,11 +273,11 @@ export default class App extends React.Component<{}, IAppState> {
                 <ProfileLinkButton href='https://github.com/JngoCreates' logo={this.state.images['github-logo.svg']} name='GitHub' profile='JngoCreates' />
               </Grid>
             </AppBar>
-            <Grid container item>
+            <Container>
               <header>
                 <Typography id='name' variant='h1'>Welcome to JngoCreates' commission page!</Typography>
               </header>
-            </Grid>
+            </Container>
             <Grid id="portfolio" container item>
               <div>
                 <Typography id='portfolio-title' variant='h2'>
@@ -322,7 +327,7 @@ export default class App extends React.Component<{}, IAppState> {
                 Send me a message.
               </Typography>
               <Typography id='msg-modal-description' variant='body1'>
-                You selected the {Tier[this.state.tier]} tier.
+                You selected an {Medium[this.state.medium]} at the {Tier[this.state.tier]} tier.
               </Typography>
               <Box id='commission-request-form'
                 component='form'
