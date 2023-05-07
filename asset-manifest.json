@@ -1,11 +1,12 @@
 {
   "files": {
-    "main.css": "/commission-site/static/css/main.fb9d7ee6.css",
-    "main.js": "/commission-site/static/js/main.6f982ffe.js",
+    "main.css": "/commission-site/static/css/main.fe31f1ec.css",
+    "main.js": "/commission-site/static/js/main.393f12ae.js",
     "static/js/787.14951307.chunk.js": "/commission-site/static/js/787.14951307.chunk.js",
     "static/media/art2.png": "/commission-site/static/media/art2.41d69aa3850f460bca33.png",
     "static/media/art7.png": "/commission-site/static/media/art7.f17525ccaf4a5af927b9.png",
     "static/media/art0.png": "/commission-site/static/media/art0.483937a0d930f570f6fc.png",
+    "static/media/art9.png": "/commission-site/static/media/art9.bba62d8f71c14d3fb30d.png",
     "static/media/wallpaper.png": "/commission-site/static/media/wallpaper.b45dc193b0ab7b675165.png",
     "static/media/art1.png": "/commission-site/static/media/art1.c1d1ae3feebc4a5d3795.png",
     "static/media/art5.png": "/commission-site/static/media/art5.8590da2f56e2de9e4258.png",
@@ -237,12 +238,12 @@
     "static/media/github-logo.svg": "/commission-site/static/media/github-logo.255db585f8a0eb28a1e4.svg",
     "static/media/youtube-logo.svg": "/commission-site/static/media/youtube-logo.d51475162e7c5e40f4da.svg",
     "index.html": "/commission-site/index.html",
-    "main.fb9d7ee6.css.map": "/commission-site/static/css/main.fb9d7ee6.css.map",
-    "main.6f982ffe.js.map": "/commission-site/static/js/main.6f982ffe.js.map",
+    "main.fe31f1ec.css.map": "/commission-site/static/css/main.fe31f1ec.css.map",
+    "main.393f12ae.js.map": "/commission-site/static/js/main.393f12ae.js.map",
     "787.14951307.chunk.js.map": "/commission-site/static/js/787.14951307.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.fb9d7ee6.css",
-    "static/js/main.6f982ffe.js"
+    "static/css/main.fe31f1ec.css",
+    "static/js/main.393f12ae.js"
   ]
 }
